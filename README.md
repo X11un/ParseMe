@@ -1,24 +1,36 @@
 # ParseMe
 
-A high-performance, lightweight multi-line configuration parser written in pure C. Optimized for Linux environments using low-level system calls and streaming architectures.
+A high-performance, lightweight credentials parser and cryptographic pipeline written in pure C. Optimized for Linux environments using low-level system calls and streaming architectures.
 
 ## Features
 
-- **Memory Efficient:** Uses a fixed 4KB buffer (aligned with Linux page sizes) to handle files of any size without RAM spikes.
-- **Zero-Copy Architecture:** Parses and tokenizes strings directly in place using pointer arithmetic.
-- **Modular Codebase:** Clean separation between the core parsing engine (`src/parser.c`) and the application controller (`src/main.c`).
-- **Automated Build System:** Complete `Makefile` with sandboxed `build/` directory generation and full cleanup support.
+- **Memory Efficient:** Uses a fixed 4KB buffer (aligned with Linux page sizes) to stream and process files of any size with a constant $O(1)$ memory footprint.
+- **Cryptographic Hashing:** Integrates OpenSSL EVP API to securely generate SHA-256 fingerprints for extracted data.
+- **Sharded Storage Architecture:** Automatically shards and buckets data into a structured `Hash256/xx/` directory tree to prevent OS directory overflow and optimize lookup times.
+- **Zero-Copy Tokenization:** Parses and manipulates strings directly in-place within the buffer using pointer arithmetic.
+- **Modular Codebase:** Clean separation between the core orchestration (`src/main.c`), crypto engine (`src/crypto.c`), and system storage operations (`src/storage.c`).
 
 ## Project Structure
 
 ```text
 .
 ├── Makefile
+├── emails.txt          # Sample test file containing mock credentials
 ├── include/
-│   └── parser.h
+│   ├── crypto.h
+│   └── storage.h
 └── src/
+    ├── crypto.c
     ├── main.c
-    └── parser.c
+    └── storage.c
+```
+
+## Prerequisites
+
+To compile and run this project, you need the OpenSSL development library installed on your system.
+
+```
+sudo apt-get install libssl-dev
 ```
 
 ## Compilation & Installation
@@ -39,20 +51,16 @@ make
 
 ## Usage
 
-Run the compiled binary by passing a configuration file as an argument:
+Run the compiled binary by passing a credentials file as an argument:
 
 ```
-./build/my_parser <path_to_config_file>
+./build/ParseMe emails.txt
 ```
 
 Upcoming Features
 
 This tool is evolving into an automated OSINT / Security leak database pipeline:
 
-- Add support for alternative delimiters (like : or ; used in standard leak formats).
+- Intelligent Parsing Engine: Automatically parse and identify column order (Email, IP, Password) via header detection.
 
-- Implement Regex or pattern matching to automatically identify Emails, IPs, and Passwords.
-
-- Integrate a cryptographic hashing module (SHA-256) to secure extracted credentials.
-
-- Build an automated sorting mechanism to categorize hashes into structured storage files.
+- Flexible Delimiters: Add support for dynamic delimiter detection (like commas, semicolons, or tabs).

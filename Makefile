@@ -4,7 +4,6 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -Iinclude
 
 SRC = src/main.c src/parser.c
-
 OBJ = build/main.o build/parser.o
 
 all: $(NAME)
@@ -15,6 +14,9 @@ $(NAME): $(OBJ)
 build/%.o: src/%.c
 	mkdir -p build
 	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f build/main.o build/parser.o
 
 fclean: clean
 	rm -rf build

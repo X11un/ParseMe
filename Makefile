@@ -3,8 +3,8 @@ NAME = build/ParseMe
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -Iinclude -lcrypto
 
-SRC = src/main.c src/crypto.c src/storage.c
-OBJ = build/main.o build/crypto.o build/storage.o
+SRC = src/main.c src/crypto.c src/storage.c src/parser.c
+OBJ = build/main.o build/crypto.o build/storage.o build/parser.o
 
 all: $(NAME)
 

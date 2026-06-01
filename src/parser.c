@@ -1,39 +1,50 @@
 #include <stdio.h>
-#include <parser.h>
+#include <string.h>
+#include "parser.h"
+#include "crypto.h"
+#include "storage.h"
 
-
-void parseBuffer(char *buffer) {
-
-    char *startLine = buffer;
+int parseBuffer(char *buffer) {
+    char *lineStart = buffer;
 
     // Loop : Line for Line
-    while (startLine != NULL && *startLine != '\0') {
-            // Search for the current line
-            char *endLine = startLine;
-            while (*endLine != '\n' && *endLine != '\0') {
-                endLine++;
-            }
-
-            // Isolate the line + prepare the next one
-            char *nextLine = NULL;
-            if (*endLine == '\n') {
-                nextLine = endLine + 1;
-                *endLine = '\0';
-            } else {
-                nextLine = NULL;  // End file 
-            }
-
-            // Loop : Key | Value
-            char *ptrSpace = startLine;
-            while (*ptrSpace != ' ' && *ptrSpace != '\0') {
-                ptrSpace++;
-            } if (*ptrSpace == ' ') {
-                *ptrSpace = '\0';  // Cut of space
-                char *key = startLine;
-                char *value = ptrSpace + 1;
-                printf("Key: %s | Value: %s\n", key, value);
-            }
-
-            startLine = nextLine;   // Next line ..
+    while (lineStart != NULL && *lineStart != '\0') {
+        char *lineEnd = lineStart;
+        while (*lineEnd != '\n' && *lineEnd != '\0') {
+            lineEnd++;
         }
+
+        char *nextLine = NULL;
+        if (*lineEnd == '\n') {
+            nextLine = lineEnd + 1;
+            *lineEnd = '\0';
+        } else {
+            break;
+        }
+
+        // Find separator and process email
+        char *colonPtr = lineStart;
+        while (*colonPtr != ':' && *colonPtr != '\0') {
+            colonPtr++;
+        }
+
+        if (*colonPtr == ':') {
+            *colonPtr = '\0';
+            char *email = colonPtr + 1;
+            char hashHex[65];
+            
+            computeSha256(email, hashHex);
+            saveHashDisk(hashHex, "Success");
+        }
+        lineStart = nextLine;
+    }
+
+    // LeftOver at the end of the chunk
+    if (lineStart && *lineStart != '\0') {
+        int leftOver = strlen(lineStart);
+        memmove(buffer, lineStart, leftOver);
+        return leftOver;
+    } 
+    
+    return 0;
 }

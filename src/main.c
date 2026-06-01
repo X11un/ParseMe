@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string.h>
-#include "crypto.h"
-#include "storage.h"
+#include "parser.h"
 
 int main(int argc, char **argv) {
 
@@ -28,43 +26,7 @@ int main(int argc, char **argv) {
         int totalBytes = bytesRead + leftOver;
         buffer[totalBytes] = '\0';
 
-        char *lineStart = buffer;
-
-        // Parse chunk line by line
-        while (lineStart != NULL && *lineStart != '\0') {
-            char *lineEnd = lineStart;
-            while (*lineEnd != '\n' && *lineEnd != '\0') {
-                lineEnd++;
-            }
-
-            char *nextLine = NULL;
-            if (*lineEnd == '\n') {
-                nextLine = lineEnd + 1;
-                *lineEnd = '\0';
-            }
-
-            char *colonPtr = lineStart;
-            while (*colonPtr != ':' && *colonPtr != '\0') {
-                colonPtr++;
-            }
-
-            if (*colonPtr == ':') {
-                *colonPtr = '\0';
-                char *email = colonPtr + 1;
-                char hashHex[65];
-                computeSha256(email, hashHex);
-                saveHashDisk(hashHex, "Success");
-            }
-            lineStart = nextLine;
-        }
-
-        // Handle leftover data at chunk boundary
-        if (lineStart && *lineStart != '\0') {
-            leftOver = strlen(lineStart);
-            memmove(buffer, lineStart, leftOver);
-        } else {
-            leftOver = 0;
-        }
+        leftOver = parseBuffer(buffer);
     }
 
     close(fdIn);
